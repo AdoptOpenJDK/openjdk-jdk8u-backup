@@ -6881,7 +6881,7 @@ test -n "$target_alias" &&
       VAR_CPU_ENDIAN=big
       ;;
     powerpc64le)
-      VAR_CPU=ppc64
+      VAR_CPU=ppc64le
       VAR_CPU_ARCH=ppc
       VAR_CPU_BITS=64
       VAR_CPU_ENDIAN=little
@@ -7018,7 +7018,7 @@ $as_echo "$OPENJDK_BUILD_OS-$OPENJDK_BUILD_CPU" >&6; }
       VAR_CPU_ENDIAN=big
       ;;
     powerpc64le)
-      VAR_CPU=ppc64
+      VAR_CPU=ppc64le
       VAR_CPU_ARCH=ppc
       VAR_CPU_BITS=64
       VAR_CPU_ENDIAN=little
@@ -8017,6 +8017,9 @@ $as_echo "$with_jvm_variants" >&6; }
     INCLUDE_SA=false
   fi
   if test "x$VAR_CPU" = xppc64 ; then
+    INCLUDE_SA=false
+  fi
+  if test "x$VAR_CPU" = xppc64le ; then
     INCLUDE_SA=false
   fi
   if test "x$OPENJDK_TARGET_CPU" = xaarch64; then
