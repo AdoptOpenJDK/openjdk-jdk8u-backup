@@ -504,10 +504,8 @@ public class CPlatformWindow extends CFRetainedResource implements PlatformWindo
     }
 
     private boolean isMaximized() {
-        if (undecorated) {
-            return this.normalBounds != null;
-        }
-        return isZoomed;
+        return undecorated ? this.normalBounds != null
+                : isZoomed;
     }
 
     private void maximize() {
