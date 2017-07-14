@@ -1484,6 +1484,7 @@ void *Type_MLU_Read(struct _cms_typehandler_struct* self, cmsIOHANDLER* io, cmsU
 
         // Check for overflow
         if (Offset < (SizeOfHeader + 8)) goto Error;
+        if (((Offset + Len) < Len) || ((Offset + Len) > SizeOfTag + 8)) goto Error;
 
         // True begin of the string
         BeginOfThisString = Offset - SizeOfHeader - 8;
@@ -4452,7 +4453,8 @@ void *Type_MPE_Read(struct _cms_typehandler_struct* self, cmsIOHANDLER* io, cmsU
     NewLUT = cmsPipelineAlloc(self ->ContextID, InputChans, OutputChans);
     if (NewLUT == NULL) return NULL;
 
-    if (!_cmsReadUInt32Number(io, &ElementCount)) return NULL;
+    if (!_cmsReadUInt32Number(io, &ElementCount)) goto Error;
+    if (!ReadPositionTable(self, io, ElementCount, BaseOffset, NewLUT, ReadMPEElem)) goto Error;
 
     if (!ReadPositionTable(self, io, ElementCount, BaseOffset, NewLUT, ReadMPEElem)) {
         if (NewLUT != NULL) cmsPipelineFree(NewLUT);
@@ -4463,6 +4465,12 @@ void *Type_MPE_Read(struct _cms_typehandler_struct* self, cmsIOHANDLER* io, cmsU
     // Success
     *nItems = 1;
     return NewLUT;
+
+    // Error
+Error:
+    if (NewLUT != NULL) cmsPipelineFree(NewLUT);
+    *nItems = 0;
+    return NULL;
 
     cmsUNUSED_PARAMETER(SizeOfTag);
 }
