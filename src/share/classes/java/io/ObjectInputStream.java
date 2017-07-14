@@ -44,8 +44,6 @@ import java.util.concurrent.ConcurrentMap;
 import static java.io.ObjectStreamClass.processQueue;
 
 import sun.misc.ObjectInputFilter;
-import sun.misc.ObjectStreamClassValidator;
-import sun.misc.SharedSecrets;
 import sun.reflect.misc.ReflectUtil;
 import sun.misc.JavaOISAccess;
 import sun.util.logging.PlatformLogger;
@@ -1716,9 +1714,6 @@ public class ObjectInputStream
                 throw new StreamCorruptedException(
                     String.format("invalid type code: %02X", tc));
         }
-        if (descriptor != null) {
-            validateDescriptor(descriptor);
-        }
         return descriptor;
     }
 
@@ -1746,6 +1741,10 @@ public class ObjectInputStream
         passHandle = NULL_HANDLE;
 
         int numIfaces = bin.readInt();
+        if (numIfaces > 65535) {
+            throw new InvalidObjectException("interface limit exceeded: "
+                    + numIfaces);
+        }
         String[] ifaces = new String[numIfaces];
         for (int i = 0; i < numIfaces; i++) {
             ifaces[i] = bin.readUTF();
@@ -3858,22 +3857,5 @@ public class ObjectInputStream
         } else {
             throw new AssertionError();
         }
-    }
-
-    private void validateDescriptor(ObjectStreamClass descriptor) {
-        ObjectStreamClassValidator validating = validator;
-        if (validating != null) {
-            validating.validateDescriptor(descriptor);
-        }
-    }
-
-    // controlled access to ObjectStreamClassValidator
-    private volatile ObjectStreamClassValidator validator;
-
-    private static void setValidator(ObjectInputStream ois, ObjectStreamClassValidator validator) {
-        ois.validator = validator;
-    }
-    static {
-        SharedSecrets.setJavaObjectInputStreamAccess(ObjectInputStream::setValidator);
     }
 }
