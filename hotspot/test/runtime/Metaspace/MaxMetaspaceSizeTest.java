@@ -1,12 +1,10 @@
 /*
- * Copyright (c) 1998, 2001, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2017, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -23,25 +21,27 @@
  * questions.
  */
 
-/************************************************************************
- * AwtMouseEvent class
+import com.oracle.java.testlibrary.ProcessTools;
+import com.oracle.java.testlibrary.OutputAnalyzer;
+
+/*
+ * @test MaxMetaspaceSizeTest
+ * @requires vm.bits == "64"
+ * @bug 8087291
+ * @library /testlibrary
+ * @run main/othervm MaxMetaspaceSizeTest
  */
 
-#ifndef AWT_MOUSEEVENT_H
-#define AWT_MOUSEEVENT_H
-
-#include <jni.h>
-#include <jni_util.h>
-
-class AwtMouseEvent {
-public:
-
-    /* java.awt.MouseEvent field ids */
-    static jfieldID xID;
-    static jfieldID yID;
-    static jfieldID causedByTouchEventID;
-    static jfieldID buttonID;
-
-};
-
-#endif // AWT_MOUSEEVENT_H
+public class MaxMetaspaceSizeTest {
+    public static void main(String... args) throws Exception {
+        ProcessBuilder pb = ProcessTools.createJavaProcessBuilder(
+            "-Xmx1g",
+            "-XX:InitialBootClassLoaderMetaspaceSize=4195328",
+            "-XX:MaxMetaspaceSize=4195328",
+            "-XX:+UseCompressedClassPointers",
+            "-XX:CompressedClassSpaceSize=1g",
+            "-version");
+        OutputAnalyzer output = new OutputAnalyzer(pb.start());
+        output.shouldContain("MaxMetaspaceSize is too small.");
+    }
+}
